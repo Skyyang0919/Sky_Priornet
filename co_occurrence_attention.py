@@ -81,7 +81,7 @@ class CoOccurrenceAttention(nn.Module):
         logits = self.coarse_cls_head(x)                           # (B, K, H, W)
         prob = torch.sigmoid(logits)                               # (B, K, H, W)
 
-        # Step 2: 类原型（像素特征的类内加权平均）
+        # Step 2: 类原型
         prototypes = torch.einsum('bchw,bkhw->bkc', x, prob)      # (B, K, C)
         prototypes = prototypes / (prototypes.norm(dim=-1, keepdim=True) + 1e-6)
         prototypes = self.proto_proj(prototypes)                   # (B, K, C)
@@ -90,11 +90,11 @@ class CoOccurrenceAttention(nn.Module):
         # Step 3: 各类在图中的存在度
         class_presence = prob.mean(dim=[2, 3])                     # (B, K)
 
-        # Step 4: 先验矩阵传播共现证据
+        # Step 4: 先验矩阵传播共现
         boost_weights = torch.sigmoid(self.co_boost)               # (K, K)
         enhancement = torch.matmul(class_presence, boost_weights.T)  # (B, K)
 
-        # Step 5: 用共现证据加权原型贡献
+        # Step 5: 用共现加权原型贡献
         alpha = F.softplus(self.alpha)
         weight = 1.0 + alpha * enhancement.unsqueeze(-1)          # (B, K, 1)
         weighted_proto = prototypes * weight                       # (B, K, C)
