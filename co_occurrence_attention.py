@@ -6,12 +6,11 @@ import torch.nn.functional as F
 class CoOccurrenceAttention(nn.Module):
     """
     可学习共存增强模块（基于类别先验的特征调制）
-
     通过可学习的 co_boost 矩阵，在类原型层面注入共现先验。
     """
 
     DEFAULT_RULES = {
-#这里是具体从数据集中统计得到的共存关系
+    #这里是具体从数据集中统计得到的共存关系
     }
 
     def __init__(
@@ -54,7 +53,7 @@ class CoOccurrenceAttention(nn.Module):
 
         # fusion：纯 PyTorch + GroupNorm
         assert in_channels % 16 == 0, (
-            f"in_channels={in_channels} 必须是 16 的倍数，以满足 GN(channels//16) 的分组要求"
+            f"in_channels={in_channels} 
         )
         self.fusion = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, kernel_size=1, bias=False),
@@ -100,15 +99,6 @@ class CoOccurrenceAttention(nn.Module):
         weight = 1.0 + alpha * enhancement.unsqueeze(-1)          # (B, K, 1)
         weighted_proto = prototypes * weight                       # (B, K, C)
 
-        # 诊断打印（每 500 iter）
-        if self._iter_count % 500 == 0:
-            with torch.no_grad():
-                print(f"[CoOcc] iter={self._iter_count} | "
-                      f"enhancement mean={enhancement.mean().item():.4f}, "
-                      f"std={enhancement.std().item():.4f} | "
-                      f"weight var={weight.var().item():.6f} | "
-                      f"alpha(softplus)={alpha.item():.6f}")
-
         return weighted_proto, class_presence
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -116,7 +106,7 @@ class CoOccurrenceAttention(nn.Module):
 
         enhanced_proto, class_presence = self._extract_class_prototypes(x)  # (B, K, C)
 
-        # 存在度归一化加权求和，得到场景级别的原型摘要
+        # 存在度归一化加权求和，得到场景级别的原型
         w = class_presence / (class_presence.sum(dim=1, keepdim=True) + 1e-6)
         proto_summary = torch.einsum("bk,bkc->bc", w, enhanced_proto)       # (B, C)
 
