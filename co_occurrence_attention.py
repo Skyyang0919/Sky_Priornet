@@ -112,13 +112,6 @@ class CoOccurrenceAttention(nn.Module):
         return weighted_proto, class_presence
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            x: (B, C, H, W)
-
-        Returns:
-            out: (B, C, H, W)  残差结构，形状与输入完全相同
-        """
         self._iter_count += 1
 
         enhanced_proto, class_presence = self._extract_class_prototypes(x)  # (B, K, C)
