@@ -9,23 +9,6 @@ The complete training pipeline, model configurations, evaluation scripts,
 and pretrained checkpoints will be released upon acceptance of the
 manuscript.
 
-## Released Components
-
-The current release will include:
-
-- Co-occurrence attention module
-- Standalone usage example
-- Parameter-counting example
-- Input/output shape verification
-
-## Requirements
-
-- Python 3.8+
-- PyTorch
-
-The complete implementation is based on MMSegmentation, MMEngine, and MMCV.
-Detailed environment information will be provided with the complete release.
-
 ## Full Release
 
 The following components will be released upon acceptance:
